@@ -13,13 +13,28 @@ protected:
     std::vector<std::unique_ptr<TreeNode>> childs;
 public:
     TreeNode() noexcept  = default;
+
     TreeNode(const TreeNode& node) {
         for(auto const& child : node.childs)
             childs.emplace_back(child->copy());
     }
-    TreeNode(TreeNode&& node) noexcept = default;
-    TreeNode& operator=(const TreeNode& node) = default;
-    TreeNode& operator=(TreeNode&& node) noexcept = default;
+
+    TreeNode(TreeNode&& node) noexcept {
+        childs = std::move(node.childs);
+    }
+
+    TreeNode& operator=(const TreeNode& node) {
+        childs.clear();
+        for(auto const& child : node.childs)
+            childs.emplace_back(child->copy());
+        return *this;
+    }
+
+    TreeNode& operator=(TreeNode&& node) noexcept {
+        childs = std::move(node.childs);
+        return *this;
+    }
+
     virtual ~TreeNode() = default;
     virtual double getValue() const = 0;
     virtual std::unique_ptr<TreeNode> copy() const = 0;
