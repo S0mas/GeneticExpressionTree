@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-std::map<char, int> variablesMap;
+#include "VariablesMap.h"
 
 class TreeNode {
 protected:
@@ -21,72 +21,94 @@ public:
     TreeNode& operator=(const TreeNode& node) = default;
     TreeNode& operator=(TreeNode&& node) noexcept = default;
     virtual ~TreeNode() = default;
-
-
-    virtual int getValue() const = 0;
+    virtual double getValue() const = 0;
     virtual std::unique_ptr<TreeNode> copy() const = 0;
+    virtual std::string toString() const = 0;
 };
 
 class ValueNode : public TreeNode {
-    int value;
+    double value;
 public:
-    ValueNode(const int value) noexcept : TreeNode(), value(value){}
+    ValueNode(const double value) noexcept : TreeNode(), value(value){}
 
-    int getValue() const override {
+    double getValue() const override {
         return value;
     }
-    void setValue(const int newValue) {
+
+    void setValue(const double newValue) {
         value = newValue;
     }
+
     std::unique_ptr<TreeNode> copy() const override {
         return std::make_unique<ValueNode>(*this);
     }
-};
 
-class OperatorNode : public TreeNode {
-public:
-    OperatorNode() noexcept : TreeNode(){}
-};
-
-class Operator1Arg : public OperatorNode {
-    std::function<int(int)> f;
-public:
-    Operator1Arg(const std::function<int(int)>& f, TreeNode* argNode) noexcept : OperatorNode(), f(f){
-        childs.push_back(std::unique_ptr<TreeNode>(argNode));
-    }
-
-    int getValue() const override {
-        return f(childs[0]->getValue());
-    }
-    std::unique_ptr<TreeNode> copy() const override {
-        return std::make_unique<Operator1Arg>(*this);
-    }
-};
-
-class Operator2Arg : public OperatorNode {
-    std::function<int(int, int)> f;
-public:
-    Operator2Arg(const std::function<int(int, int)>& f, TreeNode* argNode1, TreeNode* argNode2) noexcept : OperatorNode(), f(f){
-        childs.push_back(std::unique_ptr<TreeNode>(argNode1));
-        childs.push_back(std::unique_ptr<TreeNode>(argNode2));
-    }
-
-    int getValue() const override {
-        return f(childs[0]->getValue(), childs[1]->getValue());
-    }
-
-    std::unique_ptr<TreeNode> copy() const override {
-        return std::make_unique<Operator2Arg>(*this);
+    std::string toString() const override {
+        return std::to_string(value);
     }
 };
 
 class VariableNode : public TreeNode {
     char sign;
 public:
-    int getValue() const override {
-        return variablesMap[sign];
+    VariableNode(const char variable) noexcept : TreeNode(), sign(variable){}
+    double getValue() const override {
+        return VariablesMap::getVariableValue(sign);
     }
+
     std::unique_ptr<TreeNode> copy() const override  {
         return std::make_unique<VariableNode>(*this);
+    }
+
+    std::string toString() const override {
+        return std::string(1, sign);
+    }
+};
+
+class OperatorNode : public TreeNode {
+protected:
+    std::string operator_;
+public:
+    OperatorNode(const std::string& operator_) noexcept : TreeNode(), operator_(operator_){}
+};
+
+class Operator1Arg : public OperatorNode {
+    std::function<double(double)> f;
+public:
+    Operator1Arg(const std::string& op_, const std::function<double(double)>& f, std::unique_ptr<TreeNode>&& argNode) noexcept : OperatorNode(op_), f(f){
+        childs.push_back(std::move(argNode));
+    }
+
+    double getValue() const override {
+        return f(childs[0]->getValue());
+    }
+
+    std::unique_ptr<TreeNode> copy() const override {
+        return std::make_unique<Operator1Arg>(*this);
+    }
+
+    std::string toString() const override {
+        return operator_ + "(" + childs[0]->toString() + ")";
+    }
+};
+
+class Operator2Arg : public OperatorNode {
+    std::function<double(double, double)> f;
+public:
+    Operator2Arg(const std::string& op_, const std::function<double(double, double)>& f, std::unique_ptr<TreeNode>&& argNode1, std::unique_ptr<TreeNode>&& argNode2) noexcept : OperatorNode(op_), f(f){
+        childs.push_back(std::move(argNode1));
+        childs.push_back(std::move(argNode2));
+    }
+
+    double getValue() const override {
+        return f(childs[0]->getValue(), childs[1]->getValue());
+    }
+
+    std::unique_ptr<TreeNode> copy() const override {
+        return std::make_unique<Operator2Arg>(*this);
+    }
+
+    std::string toString() const override {
+        return "(" + childs[0]->toString() + " " + operator_ + " " + childs[1]->toString() + ")";
     }
 };
