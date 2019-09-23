@@ -23,7 +23,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    ExpressionData.h \
     OperatorMapper.h \
     TreeBuilder.h \
-    TreeNode.h \
-    VariablesMap.h
+    TreeNode.h
