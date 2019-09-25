@@ -3,11 +3,26 @@
 #include "utils.h"
 #include "Hyperparameters.h"
 #include <vector>
+#include <optional>
 
 template<typename ObjectType>
-void evaluation(std::vector<std::pair<std::unique_ptr<ObjectType>, double>>& population) {
-	for (auto& pair : population)
-		pair.second = evaluate(pair.first);
+auto initPopulation(const size_t populationSize) {
+	std::vector<std::pair<std::unique_ptr<ObjectType>, double>> population;
+	population.reserve(populationSize);
+	for (auto i = 0u; i < populationSize; ++i)
+		population.push_back({ Builder::build<ObjectType>(), std::numeric_limits<double>::max() });
+	return population;
+}
+
+template<typename ObjectType>
+std::optional<std::pair<std::unique_ptr<ObjectType>, double>> evaluation(std::vector<std::pair<std::unique_ptr<ObjectType>, double>>& population) {
+	for (auto& pair : population) {
+		auto result = evaluate(pair.first);
+		pair.second = result;
+		if (result == 0)
+			return std::move(pair);
+	}
+	return {};
 }
 
 template<typename ObjectType>
@@ -17,15 +32,17 @@ void selection(std::vector<std::pair<std::unique_ptr<ObjectType>, double>>& popu
 }
 
 template<typename ObjectType>
-auto process(const Hyperparameters hyperparameters = Hyperparameters()) {
+auto process(const Hyperparameters hyperparameters = Hyperparameters(), const std::vector<std::pair<std::unique_ptr<ObjectType>, double>>& initPop = {}) {
 	std::vector<std::pair<std::unique_ptr<ObjectType>, double>> population;
-	population.reserve(hyperparameters.populationSize);
-	Builder builder;
-	for(auto i = 0u; i < hyperparameters.populationSize; ++i)
-		population.push_back({ builder.build<ObjectType>(), std::numeric_limits<double>::max() });
-
+	if(initPop.empty())
+		population = initPopulation<ObjectType>(hyperparameters.populationSize);
+	else {
+		for (auto const& element : initPop)
+			population.push_back({ element.first->copy(), std::numeric_limits<double>::max() });
+	}
 	for (auto epoch = 0u; epoch < hyperparameters.epochs; ++epoch) {
-		evaluation(population);
+		if(auto result = evaluation(population))
+			return std::move(*result);
 		selection(population);
 		std::vector<ObjectType*> selectedPopulation;
 		selectedPopulation.reserve(population.size()/2);
@@ -57,7 +74,7 @@ auto process(const Hyperparameters hyperparameters = Hyperparameters()) {
 			}
 			else if (r < (hyperparameters.mutationChance + hyperparameters.crossoverChance + hyperparameters.randomAdditionChance)) {
 				selectedPopulation.erase(selectedPopulation.begin());
-				population.push_back({ builder.build<ObjectType>(), std::numeric_limits<double>::max() });
+				population.push_back({ Builder::build<ObjectType>(), std::numeric_limits<double>::max() });
 			}
 			else {
 				population.push_back({ selectedPopulation[0]->copy(), std::numeric_limits<double>::max() });
@@ -65,7 +82,35 @@ auto process(const Hyperparameters hyperparameters = Hyperparameters()) {
 			}
 		}
 	}
-	evaluation(population);
-	std::sort(population.begin(), population.end(), [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 	return std::move(population[0]);
+}
+
+std::vector<std::pair<std::unique_ptr<TreeNode>, double>> population;
+
+double evaluate(const std::unique_ptr<TreeNode>& tree) noexcept {
+	double result = 0;
+	do {
+		result += abs(TreeNode::expData.getExpectedResult() - tree->getValue());
+	} while (TreeNode::expData.next());
+
+	return result;
+}
+
+double evaluate(const std::unique_ptr<Hyperparameters>& hyperparams) noexcept {
+	std::cout << hyperparams->toString();
+	auto start = std::chrono::high_resolution_clock::now();
+	std::pair<std::unique_ptr<TreeNode>, double> c;
+	do {
+		c = process<TreeNode>(*hyperparams, population);
+		if ((std::chrono::high_resolution_clock::now() - start).count() > 2000000000) {
+			std::cout << "\n TARDED\n";
+			return 2000000000;
+		}
+
+		std::cout << ".";
+	} while (c.second != 0);
+	
+	auto result = (std::chrono::high_resolution_clock::now() - start).count();
+	std::cout << "\n time: " << result << "\n";
+	return result;
 }

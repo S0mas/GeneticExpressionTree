@@ -6,13 +6,18 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 	TreeNode::expData.readExpressionFromFile("data.txt");
-	auto c = process<TreeNode>();
-	while (c.second != 0) {
-		c = process<TreeNode>();
-		std::cout << c.first->toString() << "\n" << c.second << std::endl;
-	}
+	population = initPopulation<TreeNode>(100);
+	Hyperparameters hyperparams;
+	hyperparams.crossoverChance = 30;
+	hyperparams.mutationChance = 30;
+	hyperparams.randomAdditionChance = 10;
+	hyperparams.populationSize = 20;
+	hyperparams.epochs = 30;
 
-	std::cout << "WINNER!!!!!!!!!!!!!!!!!" << std::endl;
+	auto c = process<Hyperparameters>(hyperparams);
+	
+	std::cout << "\nWINNER!!!!!!!!!!!!!!!!!" << std::endl;
+	std::cout << c.first->toString() << "\n" << c.second << std::endl;
 
     return a.exec();
 }

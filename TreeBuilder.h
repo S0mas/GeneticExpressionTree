@@ -59,7 +59,7 @@ void getRandomNodeHelper(int& randomNodeId, std::unique_ptr<TreeNode> & node, st
 		getRandomNodeHelper(--randomNodeId, child, result);
 }
 
-std::unique_ptr<TreeNode> & getRandomNode(std::unique_ptr<TreeNode> & tree) noexcept {
+std::unique_ptr<TreeNode>& getRandomNode(std::unique_ptr<TreeNode> & tree) noexcept {
 	auto randomNodeId = getRandomNumber(getChildsCount(tree) + 1);
 	std::unique_ptr<TreeNode> * *ptr = new std::unique_ptr<TreeNode> * ();
 	*ptr = nullptr;

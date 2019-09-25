@@ -12,5 +12,5 @@ void split(const std::string& str, Container& cont) {
 
 int getRandomNumber(const unsigned max = std::numeric_limits<unsigned>::max(), const int min = 0) {
 	std::random_device rd;
-	return rd()%max + min;
+	return (rd()%max + min);
 }

@@ -1,18 +1,24 @@
 #pragma once
 #include <memory>
 #include "TreeBuilder.h"
+#include "Hyperparameters.h"
 
 class Builder {
 public:
 
 	template<typename ObjectToBuild>
-	std::unique_ptr<ObjectToBuild> build() {
+	inline static std::unique_ptr<ObjectToBuild> build() {
 		return std::make_unique<ObjectToBuild>();
 	}
 
 	template<>
-	std::unique_ptr<TreeNode> build() {
+	inline static std::unique_ptr<TreeNode> build() {
 		TreeBuilder tb;
 		return tb.generateTree();
+	}
+
+	template<>
+	inline static std::unique_ptr<Hyperparameters> build() {
+		return HyperparametersBuilder::generateHyperparams();
 	}
 };

@@ -5,7 +5,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "AbstractGeneticObject.h"
 #include "ExpressionData.h"
 
 class TreeNode {
@@ -136,12 +135,3 @@ public:
 		return "(" + childs[0]->toString() + " " + operator_ + " " + childs[1]->toString() + ")";
 	}
 };
-
-
-double evaluate(const std::unique_ptr<TreeNode>& tree) noexcept {
-	double result = 0;
-	do {
-		result += abs(TreeNode::expData.getExpectedResult() - tree->getValue());
-	} while (TreeNode::expData.next());
-	return result;
-}
