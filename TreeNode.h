@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "AbstractGeneticObject.h"
 #include "ExpressionData.h"
 
 class TreeNode {
@@ -38,23 +39,8 @@ public:
 		return *this;
 	}
 
-	void evaluate() noexcept {
-		double result = 0;
-		do {
-			result += abs(expData.getExpectedResult() - getValue());
-		} while (expData.next());
-		fitness = result;
-	}
-
-	double getFitness() const noexcept {
-		return fitness;
-	}
-
-	std::vector<TreeNode*> getChilds() const noexcept {
-		std::vector<TreeNode*> result;
-		for (auto& child : childs)
-			result.push_back(child.get());
-		return result;
+	std::vector<std::unique_ptr<TreeNode>>& getChilds() noexcept {
+		return childs;
 	}
 
 	virtual ~TreeNode() = default;
@@ -150,3 +136,12 @@ public:
 		return "(" + childs[0]->toString() + " " + operator_ + " " + childs[1]->toString() + ")";
 	}
 };
+
+
+double evaluate(const std::unique_ptr<TreeNode>& tree) noexcept {
+	double result = 0;
+	do {
+		result += abs(TreeNode::expData.getExpectedResult() - tree->getValue());
+	} while (TreeNode::expData.next());
+	return result;
+}

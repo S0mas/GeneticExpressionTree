@@ -8,9 +8,9 @@ class TreeBuilder {
 	int minConstant = 0;
 	int maxConstant = 0;
 	std::unique_ptr<TreeNode> getRandomTreeNode() {
-		switch (getRandom()% 4) {
+		switch (getRandomNumber(3)) {
 		case 0:
-			return buildTreeNode(getRandom(maxConstant, minConstant));
+			return buildTreeNode(getRandomNumber(maxConstant, minConstant));
 		case 1:
 			return buildTreeNode(TreeNode::expData.getRandomVariable());
 		default:
@@ -40,3 +40,46 @@ public:
 		return getRandomTreeNode();
 	}
 };
+
+void getChildsCountHelper(unsigned& childsCount, const std::unique_ptr<TreeNode>& node) noexcept {
+	for (const auto& child : node->getChilds())
+		getChildsCountHelper(++childsCount, child);
+}
+
+unsigned getChildsCount(const std::unique_ptr<TreeNode> & node) noexcept {
+	auto childsCount = 0u;
+	getChildsCountHelper(childsCount, node);
+	return childsCount;
+}
+
+void getRandomNodeHelper(int& randomNodeId, std::unique_ptr<TreeNode> & node, std::unique_ptr<TreeNode> * *result) noexcept {
+	if (randomNodeId == 0)
+		* result = &node;
+	for (auto& child : node->getChilds())
+		getRandomNodeHelper(--randomNodeId, child, result);
+}
+
+std::unique_ptr<TreeNode> & getRandomNode(std::unique_ptr<TreeNode> & tree) noexcept {
+	auto randomNodeId = getRandomNumber(getChildsCount(tree) + 1);
+	std::unique_ptr<TreeNode> * *ptr = new std::unique_ptr<TreeNode> * ();
+	*ptr = nullptr;
+	getRandomNodeHelper(randomNodeId, tree, ptr);
+	return **ptr;
+}
+
+std::pair<std::unique_ptr<TreeNode>, std::unique_ptr<TreeNode>> crossover(const TreeNode* lhs, const TreeNode* rhs) {
+	std::pair<std::unique_ptr<TreeNode>, std::unique_ptr<TreeNode>> childs{ lhs->copy(), rhs->copy() };
+	auto& randomNode1 = getRandomNode(childs.first);
+	auto& randomNode2 = getRandomNode(childs.second);
+	randomNode1.swap(randomNode2);
+	return childs;
+}
+
+std::unique_ptr<TreeNode> mutation(const TreeNode* tree) {
+	auto copyToMutate = tree->copy();
+	auto& randomNode = getRandomNode(copyToMutate);
+	TreeBuilder builder;
+	auto ptr = builder.generateTree();
+	randomNode.swap(ptr);
+	return copyToMutate;
+}

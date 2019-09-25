@@ -10,7 +10,7 @@ void split(const std::string& str, Container& cont) {
 		std::back_inserter(cont));
 }
 
-int getRandom(const unsigned max = std::numeric_limits<unsigned>::max(), const int min = 0) {
+int getRandomNumber(const unsigned max = std::numeric_limits<unsigned>::max(), const int min = 0) {
 	std::random_device rd;
 	return rd()%max + min;
 }

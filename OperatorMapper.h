@@ -40,6 +40,6 @@ public:
 	}
 
 	static std::string getRandomOperator() noexcept {
-		return operators[getRandom(operators.size())];
+		return operators[getRandomNumber(operators.size())];
 	}
 };

@@ -33,7 +33,7 @@ public:
 	}
 
 	unsigned int getRandomVariable() const noexcept {
-		return getRandom(getVariablesNo());
+		return getRandomNumber(getVariablesNo());
 	}
 
 	double getVariableValue(const unsigned variableId) const noexcept {
