@@ -11,7 +11,7 @@
 #include "utils.h"
 
 class OperatorMapper {
-	inline static const std::array<std::string, 17> operators = { "~", "abs", "exp", "log", "log2", "log10", "sin", "cos", "sinh", "cosh", "floor", "ceil", "*", "/", "+", "-", "^" };
+	inline static const std::array<std::string, 7> operators = { "~",/* "abs", "exp", "log", "log2", "log10",*/ "sin", "cos", /*"sinh", "cosh", "floor", "ceil", */"*", "/", "+", "-"/*, "^"*/ };
 	inline const static std::map<std::string, std::function<double(double)>> operators1ArgToFunctionsMap = {
 	{"~", std::negate<double>()}, {"abs", [](const double value) {return std::abs(value); }},
 	{"exp", [](const double value) {return std::exp(value); }}, {"log", [](const double value) {return std::log(value); }},

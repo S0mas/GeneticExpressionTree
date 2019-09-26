@@ -9,6 +9,7 @@ struct Hyperparameters {
 	unsigned populationSize = 100;
 	unsigned crossoverChance = 20;
 	unsigned mutationChance = 30;
+	unsigned populationErase = 50;
 	unsigned randomAdditionChance = 5;
 	unsigned epochs = 100;
 
@@ -49,7 +50,7 @@ struct Hyperparameters {
 
 	std::string toString() const {
 		return "PopulationSize:" + std::to_string(populationSize) + " crossoverChance:" + std::to_string(crossoverChance) + " mutationChance:" + std::to_string(mutationChance) +
-			" randomAdditionChance:" + std::to_string(randomAdditionChance) + " epochs:" + std::to_string(epochs);
+			" randomAdditionChance:" + std::to_string(randomAdditionChance) + " populationErase:" + std::to_string(populationErase) +" epochs:" + std::to_string(epochs);
 	}
 
 	std::unique_ptr<Hyperparameters> copy() const noexcept {
@@ -61,11 +62,12 @@ class HyperparametersBuilder {
 public:
 	inline static std::unique_ptr<Hyperparameters> generateHyperparams() noexcept {
 		auto hyperparams = std::make_unique<Hyperparameters>();
-		hyperparams->populationSize = 200;
-		hyperparams->crossoverChance = getRandomNumber(60, 45);
-		hyperparams->mutationChance = getRandomNumber(60,45);
+		hyperparams->populationSize = 100;
+		hyperparams->crossoverChance = getRandomNumber(95, 55);
+		hyperparams->mutationChance = getRandomNumber(95,55);
 		hyperparams->randomAdditionChance = getRandomNumber(15, 5);
-		hyperparams->epochs = getRandomNumber(60, 30);
+		hyperparams->epochs = getRandomNumber(60, 40);
+		hyperparams->populationErase = getRandomNumber(50, 20);
 		return hyperparams;
 	}
 };

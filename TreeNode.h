@@ -12,15 +12,21 @@ protected:
 	std::vector<std::unique_ptr<TreeNode>> childs;
 	double fitness = 0;
 public:
+	inline static long long int created = 0;
+	inline static long long int destroyed = 0;
 	inline static ExpressionData expData;
-	TreeNode() noexcept = default;
+	TreeNode() noexcept {
+		++created;
+	}
 
 	TreeNode(const TreeNode& node) {
+		++created;
 		for (auto const& child : node.childs)
 			childs.emplace_back(child->copy());
 	}
 
 	TreeNode(TreeNode && node) noexcept {
+		++created;
 		childs = std::move(node.childs);
 		node.childs.clear();
 	}
@@ -42,7 +48,9 @@ public:
 		return childs;
 	}
 
-	virtual ~TreeNode() = default;
+	virtual ~TreeNode() {
+		--created;
+	}
 	virtual double getValue() const = 0;
 	virtual std::unique_ptr<TreeNode> copy() const = 0;
 	virtual std::string toString() const = 0;
@@ -93,6 +101,7 @@ protected:
 	std::string operator_;
 public:
 	OperatorNode(const std::string& operator_) noexcept : TreeNode(), operator_(operator_) {}
+	virtual ~OperatorNode() = default;
 };
 
 class Operator1Arg : public OperatorNode {

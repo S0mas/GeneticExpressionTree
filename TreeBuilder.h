@@ -34,7 +34,7 @@ class TreeBuilder {
 		throw std::runtime_error("This operator is not supported!");
 	}
 public:
-	std::unique_ptr<TreeNode> generateTree(const int minConstant = -100, const int maxConstant = 100) {
+	std::unique_ptr<TreeNode> generateTree(const int minConstant = -1000, const int maxConstant = 1000) {
 		this->minConstant = minConstant;
 		this->maxConstant = maxConstant;
 		return getRandomTreeNode();
@@ -52,19 +52,21 @@ unsigned getChildsCount(const std::unique_ptr<TreeNode> & node) noexcept {
 	return childsCount;
 }
 
-void getRandomNodeHelper(int& randomNodeId, std::unique_ptr<TreeNode> & node, std::unique_ptr<TreeNode> * *result) noexcept {
+void getRandomNodeHelper(int& randomNodeId, std::unique_ptr<TreeNode> & node, std::unique_ptr<std::unique_ptr<TreeNode>>& result) noexcept {
 	if (randomNodeId == 0)
-		* result = &node;
+		result.reset(&node);
 	for (auto& child : node->getChilds())
 		getRandomNodeHelper(--randomNodeId, child, result);
 }
 
 std::unique_ptr<TreeNode>& getRandomNode(std::unique_ptr<TreeNode> & tree) noexcept {
 	auto randomNodeId = getRandomNumber(getChildsCount(tree) + 1);
-	std::unique_ptr<TreeNode> * *ptr = new std::unique_ptr<TreeNode> * ();
+	auto ptr = std::make_unique<std::unique_ptr<TreeNode>>();
 	*ptr = nullptr;
 	getRandomNodeHelper(randomNodeId, tree, ptr);
-	return **ptr;
+	auto& result = *ptr.get();
+	ptr.release();
+	return result;
 }
 
 std::pair<std::unique_ptr<TreeNode>, std::unique_ptr<TreeNode>> crossover(const TreeNode* lhs, const TreeNode* rhs) {

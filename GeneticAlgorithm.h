@@ -19,7 +19,7 @@ std::optional<std::pair<std::unique_ptr<ObjectType>, double>> evaluation(std::ve
 	for (auto& pair : population) {
 		auto result = evaluate(pair.first);
 		pair.second = result;
-		if (result == 0)
+		if (floor(result) == 0)
 			return std::move(pair);
 	}
 	return {};
@@ -72,16 +72,13 @@ auto process(const Hyperparameters hyperparameters = Hyperparameters(), const st
 				population.push_back({ mutation(selectedPopulation[treeId]), std::numeric_limits<double>::max() });
 				selectedPopulation.erase(selectedPopulation.begin() + treeId);
 			}
-			else if (r < (hyperparameters.mutationChance + hyperparameters.crossoverChance + hyperparameters.randomAdditionChance)) {
+			else {
 				selectedPopulation.erase(selectedPopulation.begin());
 				population.push_back({ Builder::build<ObjectType>(), std::numeric_limits<double>::max() });
 			}
-			else {
-				population.push_back({ selectedPopulation[0]->copy(), std::numeric_limits<double>::max() });
-				selectedPopulation.erase(selectedPopulation.begin());				
-			}
 		}
 	}
+
 	return std::move(population[0]);
 }
 
@@ -111,6 +108,6 @@ double evaluate(const std::unique_ptr<Hyperparameters>& hyperparams) noexcept {
 	} while (c.second != 0);
 	
 	auto result = (std::chrono::high_resolution_clock::now() - start).count();
-	std::cout << "\n time: " << result << "\n";
+	std::cout << "\n time[ms]: " << result/1000'000 << "\n";
 	return result;
 }
