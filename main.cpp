@@ -6,14 +6,16 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-	TreeNode::expData.readExpressionFromFile("data.txt");
+    std::string pathToDataFile = "D:/Programowanie/GeneticExpressionTree/data.txt";
+    static_assert(false, "Specify pathToDataFile (example file is in the repo, data.txt) and comment this out");
+    TreeNode::expData.readExpressionFromFile(pathToDataFile);
 
 	std::vector<std::pair<std::unique_ptr<Hyperparameters>, double>> paramsVec;
 	for (auto i = 0u; i < 7; ++i) {
 		auto hyp = HyperparametersBuilder::generateHyperparams();
 		hyp->crossoverChance = 65 - i*5;
 		hyp->mutationChance = 20 + i*5;
-		hyp->epochs = 1000;
+        hyp->epochs = 200;
 		paramsVec.push_back({ std::move(hyp) , 0 });
 	}
 	auto iterationNo = 100;
@@ -29,7 +31,7 @@ int main(int argc, char *argv[])
 			}
 
 			system("CLS");
-			std::cout << "Iteration :" << iteration + 1 << "/" << iterationNo << "\nObjects tesed: " << i + 1 << "/" << paramsVec.size() << std::flush;
+            std::cout << "Iteration :" << iteration + 1 << "/" << iterationNo << "\nObjects tested: " << i + 1 << "/" << paramsVec.size() << std::flush;
 			std::cout << "\nBest Result :" << bestResult << ":" << bestAprox->toString() << std::flush;
 		}
 	}
